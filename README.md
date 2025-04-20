@@ -23,7 +23,7 @@ A simple client-side demonstration built with PHP, HTML, CSS, JavaScript, ajax a
 1. **Clone this repository** (or download ZIP):
 
    ```bash
-   git clone https://github.com/Donndii/Store.git
+   git clone https://github.com/Donndii/store.git
    ```
 2. **Move the project folder into XAMPP’s `htdocs`** directory:
 
