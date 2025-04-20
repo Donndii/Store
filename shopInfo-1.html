@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>product details</title>
+
+    <link rel="stylesheet" type="text/css" href="css/basic.css" />
+    <link rel="stylesheet" type="text/css" href="css/demo.css" />
+    <link rel="stylesheet" type="text/css" href="css/optstyle.css" />
+    <link rel="stylesheet" type="text/css" href="css/infoStyle.css" />
+    <style>
+        @media only screen and (min-width: 1025px) {
+            .search-bar {
+                padding: 0px 70px 0 0px;
+                margin: 0px 0px 0px 0px;
+            }
+        }
+
+        @media only screen and (min-width: 640px) {
+            .nav.white .logoBig img {
+                width: 100%;
+                margin-left: 76px;
+
+            }
+
+            .enlarge {
+                border: 1px solid #CDCDCD;
+                position: relative;
+                width: 400px;
+                height: 400px;
+            }
+
+            .tool {
+                display: none;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 200px;
+                height: 200px;
+                background: goldenrod;
+                opacity: 0.6;
+                cursor: move;
+            }
+
+            .bigbox {
+                width: 400px;
+                height: 400px;
+                overflow: hidden;
+                position: absolute;
+                top: 0;
+                left: 410px;
+                z-index: 1;
+                display: none;
+            }
+
+            .bigbox img {
+                width: 800px;
+                height: 800px;
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+
+            .tb-thumb .selected {
+                border: 1px solid red;
+            }
+
+            .tb-detail-price {
+                background-color: #f9f9f9;
+                padding: 0px 24px;
+                border-radius: 8px;
+                margin-top: 12px;
+            }
+
+            .tb-detail-price p {
+                font-size: 15px;
+                margin: 8px 0;
+                color: #333;
+                line-height: 1.6;
+            }
+
+            .tb-detail-price strong {
+                display: inline-block;
+                width: 90px;
+                /* Align labels */
+                color: #000;
+                font-weight: bold;
+            }
+
+            .search-bar {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-top: 10px;
+                margin-bottom: 10px;
+            }
+
+            .search-bar form {
+                display: flex;
+                border: 2px solid #e4393c;
+                border-radius: 4px;
+                overflow: hidden;
+            }
+
+            .search-bar input[type="text"] {
+                height: 40px;
+                width: 400px;
+                padding-left: 10px;
+                font-size: 16px;
+                border: none;
+                outline: none;
+            }
+
+            .search-bar button {
+                height: 40px;
+                padding: 0 20px;
+                background-color: #e4393c;
+                color: white;
+                font-size: 16px;
+                border: none;
+                cursor: pointer;
+            }
+        }
+
+        .logoBig img {
+            height: 50px;
+            /* 設定高度與 header 一致 */
+            width: auto;
+            /* 等比例縮放 */
+            object-fit: contain;
+            /* 保持比例不變形 */
+            margin-top: 0px;
+            margin-bottom: 0px;
+        }
+
+        .nav.white .logoBig {
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+
+        @media only screen and (min-width: 640px) {
+            .nav.white .logoBig img {
+                width: 100%;
+                margin-left: 165px;
+                margin-top: 19px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Top navigation bar -->
+    <div class="mr-container header">
+        <ul class="message-l">
+            <div class="topMessage">
+                <div class="menu-hd">
+                    <div class="menu-hd" id="auth-bar"></div>
+
+                    <script>
+                        const authBar = document.getElementById("auth-bar");
+                        const user = sessionStorage.getItem("user");
+
+                        if (user) {
+                            authBar.innerHTML = `
+                          <span style="color: green">${user}&nbsp;Welcome!</span>
+                          <a onclick="logout()" style="cursor: pointer; color: red;">Log out</a>
+                        `;
+                        } else {
+                            authBar.innerHTML = `
+                          <a href="login.html" target="_top" class="h" style="color: red">Please login</a>
+                          <span class="separator" style="color: black">|</span>
+                          <a href="register.html" target="_top" style="color: red">Register for free</a>`;
+                        }
+
+                        function logout() {
+                            if (confirm("Are you sure to log out?")) {
+                                sessionStorage.removeItem("user");
+                                location.reload();
+                            }
+                        }
+                    </script>
+
+                </div>
+            </div>
+        </ul>
+        <ul class="message-r">
+            <div class="topMessage home">
+                <div class="menu-hd"><a href="index.html" target="_top" class="h" style="color:red">home page</a></div>
+            </div>
+            <div class="topMessage mini-cart">
+                <div class="menu-hd">
+                    <a id="mc-menu-hd" href="shopCart.html" target="_top">
+                        <i class="mr-icon-shopping-cart  mr-icon-fw"></i>
+                        <span style="color:red">shopCart</span>
+                        <strong id="J_MiniCartNum" class="h"></strong>
+                    </a>
+                </div>
+            </div>
+        </ul>
+    </div>
+    <script>
+        var J_MiniCartNum = document.getElementById("J_MiniCartNum");
+        if (!sessionStorage.getItem('user')) {
+            J_MiniCartNum.innerHTML = "";
+        } else {
+            var cartList = sessionStorage.getItem('cartList') ? JSON.parse(sessionStorage.getItem('cartList')) : [];
+            J_MiniCartNum.innerHTML = cartList.length.toString();
+        }
+    </script>
+    <!-- Floating search box -->
+    <div class="nav white">
+        <div class="logo"><a href="index.html"><img src="images/logo1.png" /></a></div>
+        <div class="logoBig">
+            <li><a href="index.html"><img src="images/logo1.png" /></a></li>
+        </div>
+        <div class="search-bar">
+            <form id="searchForm" onsubmit="searchProduct(); return false;">
+                <input type="text" id="searchInput" placeholder="Search" />
+                <button type="submit">Search</button>
+            </form>
+        </div>
+
+    </div>
+
+    <div class="clear"></div>
+    <b class="line"></b>
+
+    <div class="listMain">
+
+
+        <ol class="mr-breadcrumb mr-breadcrumb-slash"></ol>
+
+        <div class="scoll">
+            <section class="slider">
+                <div class="flexslider">
+                    <ul class="slides">
+                        <li>
+                            <img src="images/01.jpg" title="pic" />
+                        </li>
+                        <li>
+                            <img src="images/02.jpg" />
+                        </li>
+                        <li>
+                            <img src="images/03.jpg" />
+                        </li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+
+        <!-- Magnifying glass -->
+
+        <div class="item-inform">
+            <div class="clearfixLeft" id="clearcontent">
+                <div class="box">
+                    <div class="enlarge" onmouseenter="mouseEnter()" onmouseleave="mouseLeave()"
+                        onMouseMove="mouseMove()">
+                        <img width="398" id="bigImg" src="images/01.jpg" title="Magnifying glass effect"
+                            onerror="this.onerror=null;this.src='images/default.jpg';">
+                        <span class="tool"></span>
+                        <div class="bigbox">
+                            <img src="images/01.jpg" class="bigimg">
+                        </div>
+                    </div>
+                </div>
+                <div class="clear"></div>
+            </div>
+            <script>
+                var n = 0;// Thumbnail index
+                var bigImgUrl = [// Product image array
+                    'images/01.jpg',
+                    'images/02.jpg',
+                    'images/03.jpg'
+                ];
+                var thumblist = document.getElementById("thumblist");// Get the ul element containing thumbnails
+                var oLi = thumblist.getElementsByTagName("li");// Get the li elements containing thumbnails
+                for (var i = 0; i < oLi.length; i++) {
+                    oLi[i].index = i;// Set thumbnail index
+                    oLi[i].onmouseover = function () {
+                        for (var j = 0; j < oLi.length; j++) {
+                            if (this.index === j) {
+                                // Set class name for current thumbnail
+                                oLi[this.index].className = "selected";
+                            } else {
+                                // Set class name to empty for other thumbnails
+                                oLi[j].className = "";
+                            }
+                        }
+                        document.getElementById("bigImg").src = bigImgUrl[this.index];
+                        document.querySelector(".bigimg").src = bigImgUrl[this.index];
+                    }
+                }
+                function mouseEnter() {// Mouse enter image effect
+                    document.querySelector('.tool').style.display = 'block';
+                    document.querySelector('.bigbox').style.display = 'block';
+                }
+                function mouseLeave() {// Mouse leave image effect
+                    document.querySelector('.tool').style.display = 'none';
+                    document.querySelector('.bigbox').style.display = 'none';
+                }
+                function mouseMove() {
+                    var enlarge = document.querySelector('.enlarge');
+                    var tool = document.querySelector('.tool');
+                    var bigimg = document.querySelector('.bigimg');
+                    // Get distance from magnifying tool to left edge of product image
+                    var x = event.clientX - enlarge.offsetLeft - tool.offsetWidth / 2 + document.documentElement.scrollLeft;
+                    // Get distance from magnifying tool to top edge of product image
+                    var y = event.clientY - enlarge.offsetTop - tool.offsetHeight / 2 + document.documentElement.scrollTop;
+                    if (x < 0) x = 0;
+                    if (y < 0) y = 0;
+                    if (x > enlarge.offsetWidth - tool.offsetWidth) {
+                        x = enlarge.offsetWidth - tool.offsetWidth;// Maximum distance from magnifying tool to left edge of product image
+                    }
+                    if (y > enlarge.offsetHeight - tool.offsetHeight) {
+                        y = enlarge.offsetHeight - tool.offsetHeight;// Maximum distance from magnifying tool to top edge of product image
+                    }
+                    // Set magnifying tool position
+                    tool.style.left = x + 'px';
+                    tool.style.top = y + 'px';
+                    // Set enlarged image position
+                    bigimg.style.left = -x * 2 + 'px';
+                    bigimg.style.top = -y * 2 + 'px';
+                }
+            </script>
+            <div class="clearfixRight">
+                <div class="tb-detail-hd">
+                    <h1>
+                        tryfirst
+                    </h1>
+                </div>
+                <div class="tb-detail-list">
+                    <div class="tb-detail-price" id="product-details">
+                        <div class="clear"></div>
+                    </div>
+                    <dl class="iteminfo_parameter sys_item_specpara">
+                        <dd>
+                            <div class="theme-popover-mask"></div>
+                            <div class="theme-popover">
+                                <div class="theme-popbod dform">
+                                    <form class="theme-signin" name="loginform" action="" method="post">
+                                        <div class="theme-signin-left">
+                                            <div class="theme-options">
+                                                <div class="cart-title number">Quantity</div>
+                        <dd>
+                            <input id="reduce" class="mr-btn mr-btn-default" name="" type="button" value="-" />
+                            <input id="text_box" name="" type="text" value="1" style="width:30px;" />
+                            <input id="add" class="mr-btn mr-btn-default" name="" type="button" value="+" />
+                        </dd>
+                </div>
+                <div class="clear"></div>
+            </div>
+            </form>
+        </div>
+    </div>
+    </dd>
+    </dl>
+    <div class="clear"></div>
+    </div>
+    <div class="pay">
+        <ul>
+            <li>
+                <div class="clearfix tb-btn tb-btn-buy theme-login">
+                    <a id="LikBuy" onclick="buyNow()" title="Buy now">Buy now</a>
+                </div>
+            </li>
+            <li>
+                <div class="clearfix tb-btn tb-btn-basket theme-login">
+                    <a id="LikBasket" onclick="addToCart()" title="Add to cart"><i></i>Add to cart</a>
+                </div>
+            </li>
+        </ul>
+    </div>
+    </div>
+    <script>
+        document.getElementById("reduce").disabled = true;
+        function setValue() {
+            // If input number is less than 1 or not a number
+            if (this.value < 1 || isNaN(this.value)) {
+                this.value = 1;
+            }
+            // If input number is greater than 100
+            if (this.value > 100) {
+                this.value = 100;
+            }
+            // Get input purchase quantity
+            var number = parseInt(document.getElementById("text_box").value);
+            // If purchase quantity is 1, disable "-" button
+            document.getElementById("reduce").disabled = number === 1 ? true : false;
+            // If purchase quantity is 100, disable "+" button
+            document.getElementById("add").disabled = number === 100 ? true : false;
+        }
+        function add() {
+            // Get purchase quantity displayed in text box
+            var number = parseInt(document.getElementById("text_box").value);
+            number++;// Increase purchase quantity by 1
+            document.getElementById("text_box").value = number;// Reset purchase quantity
+            // If purchase quantity is 1, disable "-" button
+            document.getElementById("reduce").disabled = number === 1 ? true : false;
+            // If purchase quantity is 100, disable "+" button
+            document.getElementById("add").disabled = number === 100 ? true : false;
+        }
+        function reduce() {
+            // Get purchase quantity displayed in text box
+            var number = parseInt(document.getElementById("text_box").value);
+            number--;// Decrease purchase quantity by 1
+            document.getElementById("text_box").value = number;// Reset purchase quantity
+            // If purchase quantity is 1, disable "-" button
+            document.getElementById("reduce").disabled = number === 1 ? true : false;
+            // If purchase quantity is 100, disable "+" button
+            document.getElementById("add").disabled = number === 100 ? true : false;
+        }
+        document.getElementById("text_box").oninput = setValue;// Call setValue() function when inputting purchase quantity
+        document.getElementById("reduce").onclick = reduce;// Decrease purchase quantity by 1
+        document.getElementById("add").onclick = add;// Increase purchase quantity by 1
+        function addCart() {
+            var goodsInfo = [// Current product information
+                {
+                    img: "images/books/book12.jpg",
+                    name: "trysecond",
+                    num: parseInt(document.getElementById("text_box").value),
+                    unitPrice: 69.80,
+                    isSelect: true
+                }
+            ]
+            // Get cart list
+            var cartList = sessionStorage.getItem('cartList') ? JSON.parse(sessionStorage.getItem('cartList')) : [];
+            if (cartList.length === 0) {
+                // Add this product to cart
+                sessionStorage.setItem('cartList', JSON.stringify(goodsInfo));
+            } else {
+                // Get index of this product in cart
+                var index = cartList.findIndex(function (item) {
+                    return item.name === "trysecond";
+                })
+                if (index === -1) {
+                    // If product not in cart, add it to beginning of cart
+                    cartList.unshift(goodsInfo[0]);
+                    // Save cart
+                    sessionStorage.setItem('cartList', JSON.stringify(cartList));
+                } else {
+                    // If product in cart, update its quantity
+                    cartList[index].num += parseInt(document.getElementById("text_box").value);
+                    // Save cart
+                    sessionStorage.setItem('cartList', JSON.stringify(cartList));
+                }
+            }
+            location.href = "shopCart.html";// Jump to cart page
+        }
+    </script>
+
+    <script>
+        function goToInfo() {
+            var info = document.getElementById("info");
+            var comment = document.getElementById("comment");
+            var youLike = document.getElementById("youLike");
+            var infoTitle = document.getElementById("infoTitle");
+            var commentTitle = document.getElementById("commentTitle");
+            var youLikeTitle = document.getElementById("youLikeTitle");
+            infoTitle.className = "mr-active";// Add style to product details tab
+            commentTitle.className = "";
+            youLikeTitle.className = "";
+            info.className = "mr-tab-panel mr-fade mr-in mr-active";// Show product details content area
+            comment.className = "mr-tab-panel mr-fade ";
+            youLike.className = "mr-tab-panel mr-fade ";
+        }
+        function goToComment() {
+            var info = document.getElementById("info");
+            var comment = document.getElementById("comment");
+            var youLike = document.getElementById("youLike");
+            var infoTitle = document.getElementById("infoTitle");
+            var commentTitle = document.getElementById("commentTitle");
+            var youLikeTitle = document.getElementById("youLikeTitle");
+            infoTitle.className = "";
+            commentTitle.className = "mr-active";// Add style to all reviews tab
+            youLikeTitle.className = "";
+            info.className = "mr-tab-panel mr-fade ";
+            comment.className = "mr-tab-panel mr-fade mr-in mr-active";// Show all reviews content area
+            youLike.className = "mr-tab-panel mr-fade ";
+        }
+        function goToYoulike() {
+            var info = document.getElementById("info");
+            var comment = document.getElementById("comment");
+            var youLike = document.getElementById("youLike");
+            var infoTitle = document.getElementById("infoTitle");
+            var commentTitle = document.getElementById("commentTitle");
+            var youLikeTitle = document.getElementById("youLikeTitle");
+            infoTitle.className = "";
+            commentTitle.className = "";
+            youLikeTitle.className = "mr-active";// Add style to you may also like tab
+            info.className = "mr-tab-panel mr-fade ";
+            comment.className = "mr-tab-panel mr-fade ";
+            youLike.className = "mr-tab-panel mr-fade mr-in mr-active";// Show you may also like content area
+        }
+
+        function getQueryParam(name) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(name);
+        }
+
+        const bookId = getQueryParam('id');
+        if (!bookId) {
+            alert('Product ID not specified');
+        } else {
+            fetch(`get_book_by_id.php?id=${bookId}`)
+                .then(response => response.json())
+                .then(book => {
+                    // Replace main image
+                    document.querySelector(".tb-detail-hd h1").textContent = book.book_name;
+                    document.getElementById("bigImg").src = book.book_pic;
+                    document.querySelector(".bigimg").src = book.book_pic;
+
+                    // Assemble image array
+                    const images = [book.book_pic];
+                    if (book.book_pic2) images.push(book.book_pic2);
+                    if (book.book_pic3) images.push(book.book_pic3);
+
+                    // Generate thumbnails
+                    const thumbList = document.getElementById("thumblist");
+                    thumbList.innerHTML = ''; // Clear original thumbnails
+
+                    images.forEach((imgSrc, index) => {
+                        const li = document.createElement("li");
+                        li.className = index === 0 ? "selected" : "";
+
+                        li.innerHTML = `
+                    <div class="tb-pic">
+                        <a href="javascript:void(0)">
+                            <img src="${imgSrc}">
+                        </a>
+                    </div>
+                `;
+
+                        li.addEventListener("mouseover", () => {
+                            document.getElementById("bigImg").src = imgSrc;
+                            document.querySelector(".bigimg").src = imgSrc;
+
+                            document.querySelectorAll("#thumblist li").forEach(el => el.classList.remove("selected"));
+                            li.classList.add("selected");
+                        });
+
+                        thumbList.appendChild(li);
+                    });
+                });
+        }
+
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        const productId = getQueryParam("id");
+        if (!productId) {
+            alert("Missing product ID");
+        } else {
+            fetch(`get_product_by_id.php?id=${productId}`)
+                .then(res => res.json())
+                .then(product => {
+                    window.currentProduct = product;
+                    if (product.error) {
+                        alert(product.error);
+                        return;
+                    }
+
+                    // Replace product name
+                    document.querySelector(".tb-detail-hd h1").textContent = product.product_name;
+
+                    // Replace main image
+                    document.getElementById("bigImg").src = product.product_img;
+                    document.querySelector(".bigimg").src = product.product_img;
+
+                    // Hide thumbnail area (if still in HTML)
+                    const thumbList = document.getElementById("thumblist");
+                    if (thumbList) thumbList.style.display = "none";
+
+                    // Insert price, type and description
+                    const detailBox = document.getElementById("product-details");
+
+                    const detailHTML = `
+                        <p><strong>Price：</strong> ¥${parseFloat(product.product_price).toFixed(2)}</p>
+                        <p><strong>Type：</strong> ${product.product_type}</p>
+                        <p><strong>Description：</strong> ${product.product_info || "No description."}</p>
+                    `;
+
+                    detailBox.insertAdjacentHTML("afterbegin", detailHTML);
+
+
+
+                });
+
+        }
+        function addToCart() {
+            updateCart("add");
+            updateCartDisplay(); // Add this line
+            alert("✅ Product successfully added to cart!");
+        }
+
+
+        function buyNow() {
+            updateCart("buy");
+            window.location.href = "shopCart.html";
+        }
+
+        function updateCart(action) {
+            const num = parseInt(document.getElementById("text_box").value);
+            const cartItem = {
+                img: window.currentProduct.product_img,
+                name: window.currentProduct.product_name,
+                num: num,
+                unitPrice: parseFloat(window.currentProduct.product_price),
+                isSelect: true
+            };
+
+            let cartList = sessionStorage.getItem("cartList") ? JSON.parse(sessionStorage.getItem("cartList")) : [];
+            const index = cartList.findIndex(item => item.name === cartItem.name);
+            if (index === -1) {
+                cartList.unshift(cartItem);
+            } else {
+                cartList[index].num += cartItem.num;
+            }
+            sessionStorage.setItem("cartList", JSON.stringify(cartList));
+        }
+        function updateCartDisplay() {
+            const J_MiniCartNum = document.getElementById("J_MiniCartNum");
+            const cartList = sessionStorage.getItem('cartList') ? JSON.parse(sessionStorage.getItem('cartList')) : [];
+            J_MiniCartNum.innerHTML = cartList.length.toString();
+        }
+
+    </script>
+
+    <script>
+        document.getElementById("searchForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
+            if (keyword === "") return;
+
+            // Request all product data
+            fetch("get_products.php")
+                .then(res => res.json())
+                .then(data => {
+                    // Try to match product name (case insensitive)
+                    const result = data.find(item =>
+                        item.product_name?.toLowerCase().includes(keyword)
+                    );
+
+                    if (result) {
+                        // If result found, jump to specified product
+                        window.location.href = "shopInfo-1.html?id=" + result.id;
+                    } else {
+                        alert("Product not found!");
+                    }
+                })
+                .catch(err => {
+                    console.error("Search error:", err);
+                    alert("Search failed, please try again later.");
+                });
+        });
+    </script>
+</body>
+
+</html>
